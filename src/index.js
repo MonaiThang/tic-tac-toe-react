@@ -2,22 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-/*
-* In React, function components are a simpler way to write components that
-* only contain a render method and don’t have their own state.
-* Instead of defining a class which extends React.Component,
-* we can write a function that takes props as input and returns what should be rendered.
-* Function components are less tedious to write than classes, and many components can be expressed this way.
-* */
 function Square(props) {
     return (
-        /*
-        * When we modified the Square to be a function component,
-        * we also changed onClick={() => this.props.onClick()} to a shorter onClick={props.onClick}
-        * (note the lack of parentheses on both sides).
-        * In a class, we used an arrow function to access the correct this value,
-        * but in a function component we don’t need to worry about this.
-        * */
         <button className="square" onClick={props.onClick}>
             {props.value}
         </button>
@@ -25,57 +11,18 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-    /*
-     * To collect data from multiple children, or to have two child components communicate with each other,
-     * you need to declare the shared state in their parent component instead.
-     * The parent component can pass the state back down to the children by using props;
-     * this keeps the child components in sync with each other and with the parent component.
-     * */
-    constructor(props) {
-        super(props);
-        this.state = {
-            squares: Array(9).fill(null),
-            xIsNext: true,
-        };
-    }
-
-    handleClick(i) {
-        const squares = this.state.squares.slice();
-        if (calculateWinner(squares) || squares[i]) {
-            return;
-        }
-        squares[i] = this.state.xIsNext ? 'X' : 'O';
-        this.setState({
-            squares: squares,
-            xIsNext: !this.state.xIsNext,
-        });
-    }
-
     renderSquare(i) {
-        /*
-        * We split the returned element into multiple lines for readability,
-        * and added parentheses so that JavaScript doesn’t insert a semicolon after return and break our code.
-        * */
         return (
             <Square
-                value={this.state.squares[i]}
-                onClick={() => this.handleClick(i)}
+                value={this.props.squares[i]}
+                onClick={() => this.props.onClick(i)}
             />
         );
     }
 
     render() {
-        const winner = calculateWinner(this.state.squares);
-        let status;
-        if (winner) {
-            status = 'Winner: ' + winner;
-        } else {
-            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-        }
-
         return (
             <div>
-                <div className="status">{status}</div>
                 <div className="board-row">
                     {this.renderSquare(0)}
                     {this.renderSquare(1)}
@@ -97,14 +44,58 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            history: [{
+                squares: Array(9).fill(null)
+            }],
+            xIsNext: true
+        };
+    }
+
+    handleClick(i) {
+        const history = this.state.history;
+        const current = history[history.length - 1];
+        const squares = current.squares.slice();
+        if (calculateWinner(squares) || squares[i]) {
+            return;
+        }
+        squares[i] = this.state.xIsNext ? 'X' : 'O';
+        this.setState({
+            /*
+            * Unlike the array push() method you might be more familiar with,
+            * the concat() method doesn’t mutate the original array, so we prefer it.
+            * */
+            history: history.concat([{
+                squares: squares
+            }]),
+            xIsNext: !this.state.xIsNext,
+        });
+    }
+
     render() {
+        const history = this.state.history;
+        const current = history[history.length - 1];
+        const winner = calculateWinner(current.squares);
+
+        let status;
+        if (winner) {
+            status = 'Winner: ' + winner;
+        } else {
+            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+        }
+
         return (
             <div className="game">
                 <div className="game-board">
-                    <Board/>
+                    <Board
+                        squares={current.squares}
+                        onClick={(i) => this.handleClick(i)}
+                    />
                 </div>
                 <div className="game-info">
-                    <div>{/* status */}</div>
+                    <div>{status}</div>
                     <ol>{/* TODO */}</ol>
                 </div>
             </div>
@@ -115,7 +106,7 @@ class Game extends React.Component {
 // ========================================
 
 ReactDOM.render(
-    <Game/>,
+    <Game />,
     document.getElementById('root')
 );
 

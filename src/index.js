@@ -11,6 +11,13 @@ import './index.css';
 * */
 function Square(props) {
     return (
+        /*
+        * When we modified the Square to be a function component,
+        * we also changed onClick={() => this.props.onClick()} to a shorter onClick={props.onClick}
+        * (note the lack of parentheses on both sides).
+        * In a class, we used an arrow function to access the correct this value,
+        * but in a function component we don’t need to worry about this.
+        * */
         <button className="square" onClick={props.onClick}>
             {props.value}
         </button>

@@ -2,22 +2,19 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-class Square extends React.Component {
-    render() {
-        return (
-            /*
-            * To save typing and avoid the confusing behavior of this,
-            * we will use the arrow function syntax for event handlers here and further below.
-            * Forgetting () => and writing onClick={alert('click')} is a common mistake,
-            * and would fire the alert every time the component re-renders.
-            * */
-            <button
-                className="square"
-                onClick={() => this.props.onClick()}>
-                {this.props.value}
-            </button>
-        );
-    }
+/*
+* In React, function components are a simpler way to write components that
+* only contain a render method and don’t have their own state.
+* Instead of defining a class which extends React.Component,
+* we can write a function that takes props as input and returns what should be rendered.
+* Function components are less tedious to write than classes, and many components can be expressed this way.
+* */
+function Square(props) {
+    return (
+        <button className="square" onClick={props.onClick}>
+            {props.value}
+        </button>
+    );
 }
 
 class Board extends React.Component {
@@ -33,11 +30,13 @@ class Board extends React.Component {
             squares: Array(9).fill(null),
         };
     }
+
     handleClick(i) {
         const squares = this.state.squares.slice();
         squares[i] = 'X';
         this.setState({squares: squares});
     }
+
     renderSquare(i) {
         /*
         * We split the returned element into multiple lines for readability,
@@ -82,7 +81,7 @@ class Game extends React.Component {
         return (
             <div className="game">
                 <div className="game-board">
-                    <Board />
+                    <Board/>
                 </div>
                 <div className="game-info">
                     <div>{/* status */}</div>
@@ -96,6 +95,6 @@ class Game extends React.Component {
 // ========================================
 
 ReactDOM.render(
-    <Game />,
+    <Game/>,
     document.getElementById('root')
 );
